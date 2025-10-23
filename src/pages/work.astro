@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import TopLayout from '../layouts/TopLayout.astro'
+import BottomLayout from '../layouts/BottomLayout.astro'
+import { contentfulClient } from '../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../lib/contentful-config'
+
+interface Page {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.PAGE
+  fields: {
+    slug: EntryFieldTypes.Text
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+  }
+}
+
+interface Experience {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.EXPERIENCE
+  fields: {
+    company: EntryFieldTypes.Text
+    position: EntryFieldTypes.Text
+    location?: EntryFieldTypes.Text
+    start: EntryFieldTypes.Text
+    end?: EntryFieldTypes.Text
+    link?: EntryFieldTypes.Text
+    tasks?: EntryFieldTypes.Array<EntryFieldTypes.Symbol>
+  }
+}
+
+const pages = await contentfulClient.getEntries<Page>({
+  content_type: CONTENTFUL_CONTENT_TYPES.PAGE
+}).catch(() => ({ items: [] }))
+
+const experiences = await contentfulClient.getEntries<Experience>({
+  content_type: CONTENTFUL_CONTENT_TYPES.EXPERIENCE
+}).catch(() => ({ items: [] }))
+
+const workPage = pages.items.find(p => p.fields.slug === 'work')
+const workExperiences = experiences.items
+---
+
+<BaseLayout title={workPage?.fields?.title || 'Work'} description={workPage?.fields?.description || 'Places I have worked.'}>
+  <main class="flex min-h-[80vh] flex-auto flex-col" transition:animate="fade">
+    <TopLayout>
+      <div class="mb-4">
+        <a href="/" class="text-primary hover:underline text-sm sm:text-base">&larr; Back to Home</a>
+      </div>
+      <h2
+        class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+      >
+        {workPage?.fields?.title || 'Work'}
+      </h2>
+    </TopLayout>
+    <BottomLayout>
+      <ul>
+        {
+          workExperiences.map((entry) => (
+            <li class="animate mt-4 border-b border-black/10 py-8 first-of-type:mt-0 first-of-type:pt-0 last-of-type:border-none dark:border-white/25">
+              <div class="mb-4 text-sm uppercase">
+                {entry.fields.start} - {entry.fields.end || 'Current'}
+              </div>
+              <a
+                href={entry.fields.link ?? ''}
+                class={`font-semibold ${entry.fields?.link ? 'text-primary' : 'text-foreground'}`}
+              >
+                {entry.fields.company}
+              </a>
+              <div class="text-sm font-semibold">{entry.fields.position}</div>
+              <article class="prose dark:prose-invert">
+                {entry.fields.tasks?.map((i) => (
+                  <>{i}</>
+                ))}
+              </article>
+            </li>
+          ))
+        }
+      </ul>
+    </BottomLayout>
+  </main>
+</BaseLayout>

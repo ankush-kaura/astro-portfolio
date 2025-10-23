@@ -1,0 +1,29 @@
+---
+import Card from '../Card.astro'
+import Pulse from '../Pulse.astro'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+
+interface Now {
+  contentTypeId: '3hvNlODyvI0oz1odsLPYQ0'
+  fields: {
+    status: EntryFieldTypes.Text
+  }
+}
+
+const nows = await contentfulClient.getEntries<Now>({
+  content_type: '3hvNlODyvI0oz1odsLPYQ0'
+}).catch(() => ({ items: [] }))
+
+const now = nows.items[0]
+---
+
+<Card colSpan="md:col-span-1" rowSpan="md:row-span-2">
+  <div class="mb-2 flex w-full items-start justify-between">
+    <div class="flex flex-col">
+      <h2>Now</h2>
+    </div>
+    <Pulse />
+  </div>
+  <p class="text-xs">{now?.fields?.status || 'Currently working as FullStack Developer'}</p>
+</Card>

@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import IntroCard from '../components/sections/IntroCard.astro'
+import AboutMe from '../components/sections/AboutMe.astro'
+import Card from '../components/Card.astro'
+import TimeZoneCard from '../components/sections/TimeZoneCard.astro'
+import ContactsCard from '../components/sections/ContactsCard.astro'
+import Now from '../components/sections/Now.astro'
+import CVCard from '../components/sections/CVCard.astro'
+import ExperienceCard from '../components/sections/ExperienceCard.astro'
+import TattooCard from '../components/sections/TattooCard.astro'
+import StudyCard from '../components/sections/StudyCard.astro'
+import { contentfulClient } from '../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../lib/contentful-config'
+
+interface Site {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.SITE
+  fields: {
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+  }
+}
+
+interface Quote {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.QUOTE
+  fields: {
+    quote: EntryFieldTypes.Text
+    author: EntryFieldTypes.Text
+  }
+}
+
+const sites = await contentfulClient.getEntries<Site>({
+  content_type: CONTENTFUL_CONTENT_TYPES.SITE
+}).catch(() => ({ items: [] }))
+
+const quotes = await contentfulClient.getEntries<Quote>({
+  content_type: CONTENTFUL_CONTENT_TYPES.QUOTE
+}).catch(() => ({ items: [] }))
+
+const randomIndex = Math.floor(Math.random() * (quotes.items).length);
+
+const site = sites.items[0]
+const quote = quotes.items[randomIndex]
+---
+
+
+<BaseLayout
+  title={site?.fields?.title || "Ankush Kaura - Full-Stack Developer & Digital Solutions Architect"}
+  description={site?.fields?.description || "Ankush Kaura - Full-Stack Developer & Digital Solutions Architect - Portfolio, Projects, CV, About Me, Contact, Timezone, Now, Experience, Study"}
+>
+  <div
+    slot="loader"
+    class="loader bg-darkslate-700 fixed bottom-0 left-0 right-0 top-0 z-50 flex h-screen w-screen items-center justify-center text-3xl font-black uppercase text-neutral-50"
+  >
+  </div>
+  <main
+    class="relative m-auto grid w-full max-w-6xl gap-3 overflow-hidden p-3 sm:gap-4 sm:p-4 md:gap-5 md:p-6 lg:grid-cols-4 lg:grid-rows-8 lg:gap-6"
+  >
+    <IntroCard />
+    <AboutMe />
+    <CVCard />
+    <Now />
+    <Card
+      colSpan="md:col-span-1"
+      rowSpan="md:row-span-2"
+      title="Portfolio & Projects"
+      href="/portfolio"
+    />
+    <Card
+      colSpan="md:col-span-1"
+      rowSpan="md:row-span-2"
+      title="Blogs"
+      href="/blogs"
+    />
+    <TimeZoneCard />
+    <ContactsCard />
+    <ExperienceCard />
+    <Card >
+      <div class="flex h-full flex-col justify-between">
+        <blockquote class="mt-6 border-l-2 pl-6 italic">
+          "{quote?.fields?.quote || 'The only way to do great work is to love what you do'}"
+        </blockquote>
+        <p class="mt-2 text-xs">- {quote?.fields?.author || 'Steve Jobs'}</p>
+      </div>
+    </Card>
+    <TattooCard />
+    <StudyCard />
+  </main>
+</BaseLayout>

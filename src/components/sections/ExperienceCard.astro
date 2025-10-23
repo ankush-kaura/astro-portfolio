@@ -1,0 +1,53 @@
+---
+import Card from '../Card.astro'
+import { Button } from '../ui/button'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../../lib/contentful-config'
+
+interface Experience {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.EXPERIENCE
+  fields: {
+    company: EntryFieldTypes.Text
+    position: EntryFieldTypes.Text
+    location?: EntryFieldTypes.Text
+    start: EntryFieldTypes.Text
+    end?: EntryFieldTypes.Text
+    link?: EntryFieldTypes.Text
+  }
+}
+
+const experiences = await contentfulClient.getEntries<Experience>({
+  content_type: CONTENTFUL_CONTENT_TYPES.EXPERIENCE
+}).catch(() => ({ items: [] }))
+---
+
+<Card colSpan="md:col-span-1" rowSpan="md:row-span-2" title="Experience">
+  <div class="mt-2 space-y-4">
+    {
+      experiences.items.length > 0 ? (
+        (experiences.items).reverse().slice(0, 4).map((exp) => (
+          <div>
+            <h3 class="text-lg font-semibold">{exp.fields.position}</h3>
+            <a class="text-sm text-primary" href={exp.fields?.link || '#'} target="_blank" rel="noopener noreferrer">
+              {exp.fields.company}
+            </a>
+            <p class="text-sm text-gray-600">
+              {exp.fields.start} - {exp.fields.end || 'Current'}
+            </p>
+            {exp.fields.location && (
+              <p class="text-xs text-gray-500">{exp.fields.location}</p>
+            )}
+          </div>
+        ))
+      ) : (
+        <div class="text-sm text-gray-500">
+          <p>Loading experience data...</p>
+        </div>
+      )
+    }
+    <a href="/work">
+      <Button variant="link" className="pl-0"> View More </Button>
+    </a>
+  </div>
+</Card>
