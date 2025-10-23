@@ -1,0 +1,115 @@
+---
+import Card from '../Card.astro'
+import { Button } from '../ui/button'
+import { Linkedin, Github, Mail } from 'lucide-react'
+import { contentfulClient } from '../../lib/contentful';
+import type { EntryFieldTypes } from 'contentful'
+
+interface Intro {
+  contentTypeId: '5QgfOQ8ByPXQBK1JlMsJIw'
+  fields: {
+    welcome: EntryFieldTypes.Text
+    name: EntryFieldTypes.Text
+    title: EntryFieldTypes.Text
+    image: {
+      sys: {
+        type: 'Link'
+        linkType: 'Asset'
+        id: string
+      }
+      fields: {
+        title: string
+        file: {
+          url: string
+          fileName: string
+          contentType: string
+        }
+      }
+    }
+    alt: EntryFieldTypes.Text
+  }
+}
+
+interface Contact {
+  contentTypeId: '3wPX3nyvcvpLirGdlmQqav'
+  fields: {
+    email: EntryFieldTypes.Text
+    github?: EntryFieldTypes.Text
+    linkedin?: EntryFieldTypes.Text
+    instagram?: EntryFieldTypes.Text
+  }
+}
+
+interface Site {
+  contentTypeId: '2qhahjwIjTSw5YY2i08AQf'
+  fields: {
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+    github?: EntryFieldTypes.Text
+    linkedin?: EntryFieldTypes.Text
+    mail?: EntryFieldTypes.Text
+    instagram?: EntryFieldTypes.Text
+  }
+}
+
+const intros = await contentfulClient.getEntries<Intro>({
+  content_type: '5QgfOQ8ByPXQBK1JlMsJIw'
+}).catch(() => ({ items: [] }))
+
+const contacts = await contentfulClient.getEntries<Contact>({
+  content_type: '3wPX3nyvcvpLirGdlmQqav'
+}).catch(() => ({ items: [] }))
+
+const sites = await contentfulClient.getEntries<Site>({
+  content_type: '2qhahjwIjTSw5YY2i08AQf'
+}).catch(() => ({ items: [] }))
+
+const intro = intros.items[0]
+const contact = contacts.items[0]
+const site = sites.items[0]
+
+---
+
+
+<Card colSpan="md:col-span-3" rowSpan="md:row-span-4">
+
+  <div class="flex h-full w-full">
+    <div class="flex flex-col justify-between gap-4 md:max-h-[300px]">
+      <div class="flex h-full flex-col">
+        <h6 class="m-0 text-sm font-light text-gray-500">{intro?.fields?.welcome || 'welcome'}</h6>
+        <p class="m-0 text-xl font-light">
+          {intro?.fields?.name || 'Hi, I am Ankush Kaura'} - {intro?.fields?.title || 'Full Stack Developer & Digital Solutions Architect'}
+        </p>
+      </div>
+      <div class="flex gap-4">
+        <a href={site?.fields?.github || '#'} aria-label="github profile" target="_blank">
+          <Button aria-label="github profile">
+            <Github />
+            <span class="sr-only">GitHub Profile</span>
+          </Button>
+        </a>
+        <a href={site?.fields?.linkedin || '#'} aria-label="linkedin profile" target="_blank">
+          <Button aria-label="linkedin profile">
+            <Linkedin />
+            <span class="sr-only">LinkedIn Profile</span>
+          </Button>
+        </a>
+        <a href={site?.fields?.mail || '#'} aria-label="mail profile" target="_blank">
+          <Button>
+            <Mail />
+            <span class="sr-only">Email contact</span>
+          </Button>
+        </a>
+      </div>
+    </div>
+    {intro?.fields?.image && (
+      <img
+        width="300"
+        height="300"
+        src={`https:${(intro.fields.image as any).fields.file.url}`}
+        class="pointer-events-none absolute bottom-[-20px] right-[-110px] z-[-1] max-h-[300px] w-auto select-none opacity-50 md:relative md:bottom-auto md:right-auto md:z-auto md:opacity-100"
+        alt={intro.fields.alt || 'Profile image'}
+      />
+    )}
+  </div>
+</Card>

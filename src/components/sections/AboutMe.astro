@@ -1,0 +1,46 @@
+---
+import Card from '../Card.astro'
+import { contentfulClient } from '../../lib/contentful';
+import type { EntryFieldTypes } from 'contentful'
+
+interface Welcome {
+  contentTypeId: '4daCkAlNhY01nQJfQYZ7nK'
+  fields: {
+    intro: EntryFieldTypes.Text
+    tools: EntryFieldTypes.Array<EntryFieldTypes.Symbol>
+    introBottom: EntryFieldTypes.Text
+  }
+}
+const entries = await contentfulClient.getEntries<Welcome>({
+  content_type: '4daCkAlNhY01nQJfQYZ7nK'
+}).catch(() => ({ items: [] }));
+---
+
+<Card colSpan="md:col-span-1" rowSpan="md:row-span-6" title="About me">
+  <div class="flex flex-col gap-2">
+    {
+      entries.items.length > 0 ? (
+        <>
+          <p class="text-sm font-light">
+            {entries.items[0]?.fields?.intro}
+            <br />
+            <br />
+            My primary tools of choice includes:
+            <ul class="list-inside list-disc">
+              {(entries.items[0]?.fields?.tools)?.map((tool) => (
+                <li class="inline-table bg-orange-500 text-white m-[0.1rem] px-[5px] rounded-[5px]">{tool}</li>
+              ))}
+            </ul>
+          </p>
+          <p class="text-sm font-light">
+            {entries.items[0]?.fields?.introBottom}
+          </p>
+        </>
+      ) : (
+        <p class="text-sm font-light text-gray-500">
+          Loading about information...
+        </p>
+      )
+    }
+  </div>
+</Card>

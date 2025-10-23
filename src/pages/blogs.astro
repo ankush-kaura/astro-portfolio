@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import TopLayout from '../layouts/TopLayout.astro'
+import BottomLayout from '../layouts/BottomLayout.astro'
+import { fetchContentfulEntries, BlogContent, PageContent, getContentfulImageUrl, getContentfulImageAlt } from '../lib/contentful-utils'
+import { CONTENTFUL_CONTENT_TYPES } from '../lib/contentful-config'
+
+// Helper function to extract string values from Contentful Text fields
+const getTextField = (field: any): string => {
+  return typeof field === 'string' ? field : field?.toString() || ''
+}
+
+// Helper function to extract date values from Contentful Date fields
+const getDateField = (field: any): string => {
+  return field || new Date().toISOString()
+}
+
+const pagesResult = await fetchContentfulEntries(CONTENTFUL_CONTENT_TYPES.PAGE)
+const blogsResult = await fetchContentfulEntries(CONTENTFUL_CONTENT_TYPES.BLOG, {
+  order: '-fields.date',
+  limit: 50
+})
+
+const pages = pagesResult.success ? pagesResult.data as PageContent[] : []
+const blogs = blogsResult.success ? blogsResult.data as BlogContent[] : []
+
+const blogsPage = pages.find(p => getTextField(p.fields.slug) === 'blogs')
+---
+
+<BaseLayout
+  title={getTextField(blogsPage?.fields?.title) || 'Blogs'}
+  description={getTextField(blogsPage?.fields?.description) || 'My blog posts'}
+>
+  <main class="flex min-h-[80vh] flex-auto flex-col" transition:animate="slide">
+    <TopLayout>
+      <div class="mb-4">
+        <a href="/" class="text-primary hover:underline text-sm sm:text-base">&larr; Back to Home</a>
+      </div>
+      <h2
+        class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+      >
+        {getTextField(blogsPage?.fields?.title) || 'Blogs'}
+      </h2>
+    </TopLayout>
+    <BottomLayout>
+      <div class="flex w-full flex-wrap justify-center gap-4 sm:gap-6 md:gap-8">
+        {
+          blogs.length > 0 ? (
+            blogs.map((blog) => {
+              const imageUrl = getContentfulImageUrl(blog.fields.heroImage)
+              const imageAlt = getContentfulImageAlt(blog.fields.heroImage, getTextField(blog.fields.title))
+              return (
+                <a
+                  href={`/blog/${getTextField(blog.fields.slug)}`}
+                  class="block w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 p-4 sm:p-5 lg:p-6 border rounded-lg hover:shadow-md transition-shadow"
+                >
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt={imageAlt}
+                      class="w-full h-32 sm:h-40 lg:h-48 object-cover rounded-lg mb-3 sm:mb-4"
+                    />
+                  )}
+                  <h3 class="text-base sm:text-lg font-semibold mb-2 line-clamp-2">{getTextField(blog.fields.title)}</h3>
+                  <p class="text-sm sm:text-base text-gray-600 mb-2 line-clamp-3">{getTextField(blog.fields.description)}</p>
+                  <p class="text-xs sm:text-sm text-gray-500">{new Date(getDateField(blog.fields.date)).toLocaleDateString()}</p>
+                </a>
+              )
+            })
+          ) : (
+            <div class="text-center py-8">
+              <p class="text-gray-500">No blogs available yet.</p>
+              <p class="text-sm text-gray-400 mt-2">Add blogs in Contentful to see them here.</p>
+            </div>
+          )
+        }
+      </div>
+    </BottomLayout>
+  </main>
+</BaseLayout>

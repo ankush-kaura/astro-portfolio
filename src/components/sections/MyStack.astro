@@ -1,0 +1,36 @@
+---
+import Card from '../Card.astro'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+
+interface Stack {
+  contentTypeId: '38XZfyTTR60ITXkT0TfRFw'
+  fields: {
+    tools: EntryFieldTypes.Array<EntryFieldTypes.Symbol>
+  }
+}
+
+const stacks = await contentfulClient.getEntries<Stack>({
+  content_type: '38XZfyTTR60ITXkT0TfRFw'
+}).catch(() => ({ items: [] }))
+
+const stack = stacks.items[0]
+---
+
+<Card colSpan="md:col-span-2" rowSpan="md:row-span-1" title="My Stack">
+  <p class="text-sm font-light">
+    Here's a snapshot of the primary tools and technologies I work with:
+  </p>
+  <ul class="list-disc pl-5 text-sm font-light">
+    {stack?.fields?.tools?.map((tool) => (
+      <li><strong>{tool}</strong></li>
+    )) || (
+      <>
+        <li><strong>Solidjs</strong></li>
+        <li><strong>JavaScript</strong></li>
+        <li><strong>Node.js</strong></li>
+        <li><strong>React.js</strong></li>
+      </>
+    )}
+  </ul>
+</Card>

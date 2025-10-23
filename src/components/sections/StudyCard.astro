@@ -1,0 +1,42 @@
+---
+import Card from '../Card.astro'
+import { Badge } from '../ui/badge'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+
+interface Study {
+  contentTypeId: '2bKLoIiREd582YgswI85Ki'
+  fields: {
+    title: EntryFieldTypes.Text
+    institution: EntryFieldTypes.Text
+    link?: EntryFieldTypes.Text
+    date: EntryFieldTypes.Text
+  }
+}
+
+const studies = await contentfulClient.getEntries<Study>({
+  content_type: '2bKLoIiREd582YgswI85Ki'
+}).catch(() => ({ items: [] }))
+---
+
+<Card  title="Study">
+  <div class="mt-2 flex w-full flex-wrap items-center justify-start gap-2">
+    {
+      studies.items.length > 0 ? (
+        (studies.items).reverse().map((study) => (
+          <div class="text-start">
+            <a href={study.fields.link || '#'} target="_blank" rel="noopener noreferrer" class="block">
+              <Badge variant="outline" className="mb-1">{study.fields.institution}</Badge>
+            </a>
+            <p class="text-xs text-gray-600">{study.fields.title}</p>
+            <p class="text-xs text-gray-500">{study.fields.date}</p>
+          </div>
+        ))
+      ) : (
+        <div class="text-sm text-gray-500">
+          <p>Loading education data...</p>
+        </div>
+      )
+    }
+  </div>
+</Card>

@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import TopLayout from '../layouts/TopLayout.astro'
+import BottomLayout from '../layouts/BottomLayout.astro'
+import ProjectCard from '../components/ProjectCard.astro'
+import { contentfulClient } from '../lib/contentful'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../lib/contentful-config'
+
+interface Page {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.PAGE
+  fields: {
+    slug: EntryFieldTypes.Text
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+  }
+}
+
+interface Project {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.PROJECT
+  fields: {
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+    image?: EntryFieldTypes.Object
+    link?: EntryFieldTypes.Text
+    technologies?: EntryFieldTypes.Array<EntryFieldTypes.Symbol>
+  }
+}
+
+const pages = await contentfulClient.getEntries<Page>({
+  content_type: CONTENTFUL_CONTENT_TYPES.PAGE
+}).catch(() => ({ items: [] }))
+
+const entries = await contentfulClient.getEntries<Project>({
+  content_type: CONTENTFUL_CONTENT_TYPES.PROJECT
+}).catch(() => ({ items: [] }))
+
+const portfolioPage = pages.items.find(p => p.fields.slug === 'portfolio')
+---
+
+<BaseLayout
+  title={portfolioPage?.fields?.title || 'Portfolio'}
+  description={portfolioPage?.fields?.description || 'Projects'}
+>
+  <main class="flex min-h-[80vh] flex-auto flex-col" transition:animate="slide">
+    <TopLayout>
+      <div class="mb-4">
+        <a href="/" class="text-primary hover:underline text-sm sm:text-base">&larr; Back to Home</a>
+      </div>
+      <h2
+        class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
+      >
+        {portfolioPage?.fields?.title || 'Projects'}
+      </h2>
+    </TopLayout>
+    <BottomLayout>
+      <div class="flex w-full flex-wrap justify-center gap-4 sm:gap-6 md:gap-8">
+        {
+          entries.items.length > 0 ? (
+            entries.items.map((entry: any) => (
+              <ProjectCard
+                key={entry?.sys?.id}
+                href={entry?.fields?.link}
+                heading={entry?.fields?.title}
+                subheading={entry?.fields?.description}
+                imagePath={entry?.fields?.image?.fields?.file?.url}
+                altText={entry?.fields?.image?.fields?.title || entry?.fields?.title}
+                class="w-full sm:w-1/2 md:w-2/5 lg:w-1/3"
+              />
+            ))
+          ) : (
+            <div class="text-center py-8">
+              <p class="text-gray-500">No projects available yet.</p>
+              <p class="text-sm text-gray-400 mt-2">Add projects in Contentful to see them here.</p>
+            </div>
+          )
+        }
+      </div>
+    </BottomLayout>
+  </main>
+</BaseLayout>

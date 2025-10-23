@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import TopLayout from '../../layouts/TopLayout.astro'
+import BottomLayout from '../../layouts/BottomLayout.astro'
+import { contentfulClient } from '../../lib/contentful'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../../lib/contentful-config'
+
+interface Blog {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.BLOG
+  fields: {
+    title: EntryFieldTypes.Text
+    slug: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+    content: EntryFieldTypes.RichText
+    heroImage?: any
+    date: EntryFieldTypes.Date
+  }
+}
+
+export async function getStaticPaths() {
+  const blogs = await contentfulClient.getEntries<Blog>({
+    content_type: CONTENTFUL_CONTENT_TYPES.BLOG
+  }).catch(() => ({ items: [] }))
+
+  return blogs.items.map((blog) => ({
+    params: { slug: blog.fields.slug },
+    props: { blog }
+  }))
+}
+
+const { blog } = Astro.props
+
+if (!blog) {
+  return Astro.redirect('/404')
+}
+
+const contentHtml = documentToHtmlString(blog.fields.content)
+---
+
+<BaseLayout
+  title={blog.fields.title || 'Blog Post'}
+  description={blog.fields.description || 'Read our latest blog post'}
+>
+  <main class="flex min-h-[80vh] flex-auto flex-col" transition:animate="slide">
+    <TopLayout>
+      <div class="mb-4 sm:mb-6">
+        <a href="/blogs" class="text-primary hover:underline text-sm sm:text-base">&larr; Back to Blogs</a>
+      </div>
+      <h1 class="scroll-m-20 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold tracking-tight">
+        {blog.fields.title || 'Untitled Post'}
+      </h1>
+      <p class="text-base sm:text-lg text-muted-foreground mt-2">
+        {blog.fields.description || 'No description available'}
+      </p>
+      <p class="text-sm text-gray-500 mt-2">
+        Published on {new Date(blog.fields.date || new Date()).toLocaleDateString()}
+      </p>
+    </TopLayout>
+    <BottomLayout>
+      <article class="prose dark:prose-invert max-w-none">
+        {blog.fields.heroImage && (
+          <img
+            src={`https:${blog.fields.heroImage.fields.file.url}`}
+            alt={blog.fields.heroImage.fields.title || blog.fields.title || 'Blog post image'}
+            class="w-full h-48 sm:h-56 lg:h-64 xl:h-72 object-cover rounded-lg mb-6 sm:mb-8"
+          />
+        )}
+        <div set:html={contentHtml} />
+      </article>
+    </BottomLayout>
+  </main>
+</BaseLayout>

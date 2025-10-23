@@ -1,0 +1,72 @@
+---
+import Card from '../Card.astro'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+
+interface Tattoo {
+  contentTypeId: '3ZZZgr8VXRALGgtSB2Od77'
+  fields: {
+    text: EntryFieldTypes.Text
+    image: {
+      sys: {
+        type: 'Link'
+        linkType: 'Asset'
+        id: string
+      }
+      fields: {
+        title: string
+        file: {
+          url: string
+          fileName: string
+          contentType: string
+        }
+      }
+    }
+    alt: EntryFieldTypes.Text
+  }
+}
+
+interface Site {
+  contentTypeId: '2qhahjwIjTSw5YY2i08AQf'
+  fields: {
+    instagram?: EntryFieldTypes.Text
+  }
+}
+
+const tattoos = await contentfulClient.getEntries<Tattoo>({
+  content_type: '3ZZZgr8VXRALGgtSB2Od77'
+}).catch(() => ({ items: [] }))
+
+const sites = await contentfulClient.getEntries<Site>({
+  content_type: '2qhahjwIjTSw5YY2i08AQf'
+}).catch(() => ({ items: [] }))
+
+const tattoo = tattoos.items[0]
+const site = sites.items[0]
+---
+
+<Card
+  colSpan="md:col-span-1"
+  rowSpan="md:row-span-1"
+  title="Fitness enthusiast"
+  href={site?.fields?.instagram || '#'}
+>
+  <div class="flex h-full w-full flex-col">
+    <div>
+      {tattoo?.fields?.image && (
+        <img
+          width="50"
+          height="50"
+          src={`https:${(tattoo.fields.image as any).fields.file.url}`}
+          class="pointer-events-none absolute bottom-[-20px] right-[-110px] z-[-1] max-h-[300px] w-auto select-none opacity-50 md:relative md:bottom-auto md:right-auto md:z-auto md:opacity-100"
+          alt={tattoo.fields.alt || 'Tattoo image'}
+        />
+      )}
+    </div>
+    <div>
+      <p class="mt-2 text-sm text-muted-foreground">
+        {tattoo?.fields?.text || "Fitness enthusiast with a drive for excellence both in and out of the gym."}
+      </p>
+    </div>
+  </div>
+</Card>

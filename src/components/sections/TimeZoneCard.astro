@@ -1,0 +1,24 @@
+---
+import Card from '../Card.astro'
+import TimeZoneV2 from './TimeZoneCardV2'
+import { contentfulClient } from '../../lib/contentful';
+import type { EntryFieldTypes } from 'contentful'
+interface TimezoneContent {
+  contentTypeId: '1qDvoUfTp7kP7nGFSyuCxo'
+  fields: {
+    place: EntryFieldTypes.Text
+    timezone: EntryFieldTypes.Text
+  }
+}
+const entries = await contentfulClient.getEntries<TimezoneContent>({
+  content_type: '1qDvoUfTp7kP7nGFSyuCxo'
+}).catch(() => ({ items: [] }));
+---
+
+<Card colSpan="lg:col-span-2" rowSpan="md:row-span-2" title="Time zone">
+  <TimeZoneV2
+    timezone={entries.items[0]?.fields?.timezone || "Asia/Calcutta"}
+    place={entries.items[0]?.fields?.place || "Chandigarh, India"}
+    client:load
+  />
+</Card>

@@ -1,0 +1,66 @@
+---
+import Card from '../Card.astro'
+import { contentfulClient } from '../../lib/contentful'
+import type { EntryFieldTypes } from 'contentful'
+import { CONTENTFUL_CONTENT_TYPES } from '../../lib/contentful-config'
+
+interface Contact {
+  contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.CONTACT
+  fields: {
+    email: EntryFieldTypes.Text
+    location?: EntryFieldTypes.Text
+    github?: EntryFieldTypes.Text
+    linkedin?: EntryFieldTypes.Text
+    instagram?: EntryFieldTypes.Text
+  }
+}
+
+const contacts = await contentfulClient.getEntries<Contact>({
+  content_type: CONTENTFUL_CONTENT_TYPES.CONTACT
+}).catch(() => ({ items: [] }))
+
+const contact = contacts.items[0]
+---
+
+<Card colSpan="md:col-span-1" rowSpan="md:row-span-1">
+  <div class="h-full">
+    <header class="flex items-center">
+      <h1 class="text-xl font-bold text-foreground">
+        Let's start working together!
+      </h1>
+    </header>
+    <address class="mt-4 flex flex-col">
+      <h2 class="text-gray-500">Contact Details</h2>
+      {contact?.fields ? (
+        <>
+          <p>{contact.fields.email}</p>
+          {contact.fields.location && (
+            <p>{contact.fields.location}</p>
+          )}
+        </>
+      ) : (
+        <p class="text-sm text-gray-500">Loading contact information...</p>
+      )}
+    </address>
+    <div class="mt-4 flex w-fit flex-col">
+      <h2 class="text-gray-500">Socials</h2>
+      <ul>
+        {contact?.fields?.linkedin && (
+          <li>
+            <a href={contact.fields.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </li>
+        )}
+        {contact?.fields?.github && (
+          <li>
+            <a href={contact.fields.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+          </li>
+        )}
+        {contact?.fields?.instagram && (
+          <li>
+            <a href={contact.fields.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+          </li>
+        )}
+      </ul>
+    </div>
+  </div>
+</Card>

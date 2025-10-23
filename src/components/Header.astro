@@ -1,0 +1,60 @@
+---
+import { buttonVariants } from '../components/ui/button'
+import { ModeToggle } from '../components/ui/ThemeToggle'
+import { contentfulClient } from '../lib/contentful';
+import type { EntryFieldTypes } from 'contentful'
+
+interface Site {
+  contentTypeId: '2qhahjwIjTSw5YY2i08AQf'
+  fields: {
+    title: EntryFieldTypes.Text
+    description: EntryFieldTypes.Text
+    github?: EntryFieldTypes.Text
+    linkedin?: EntryFieldTypes.Text
+    mail?: EntryFieldTypes.Text
+    instagram?: EntryFieldTypes.Text
+  }
+}
+const sites = await contentfulClient.getEntries<Site>({
+  content_type: '2qhahjwIjTSw5YY2i08AQf'
+}).catch(() => ({ items: [] }))
+
+const site = sites.items[0]
+---
+
+<script is:inline>
+  document.addEventListener('astro:after-swap', function () {
+    if (localStorage.getItem('theme') === 'dark')
+      document.documentElement.classList.toggle('dark', true)
+  })
+
+  const getThemePreference = () => {
+    return localStorage.getItem('theme')
+  }
+
+  const isDark = getThemePreference() === 'dark'
+  document.documentElement.classList[isDark ? 'add' : 'remove']('dark')
+</script>
+
+<header
+  class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+>
+  <div
+    class="container flex h-16 items-center justify-between px-4 sm:px-6"
+  >
+    <div class="flex items-center">
+      <a href="/" class="flex items-center space-x-2">
+        <span class="inline-block font-bold text-sm sm:text-base">Ankush Kaura</span>
+      </a>
+    </div>
+    <div class="flex items-center space-x-2 sm:space-x-4">
+      <nav class="flex items-center space-x-1 sm:space-x-2">
+        <a href={site?.fields?.github || '#'} target="_blank" rel="noreferrer" class={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+          <span class="hidden sm:inline">GitHub</span>
+          <span class="sm:hidden">GH</span>
+        </a>
+        <ModeToggle transition:persist client:load />
+      </nav>
+    </div>
+  </div>
+</header>
