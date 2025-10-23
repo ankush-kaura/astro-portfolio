@@ -14,12 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug Event
-        run: |
-          echo "Event name: $GITHUB_EVENT_NAME"
-          echo "Event type: ${{ github.event.action || github.event_name }}"
-          echo "Ref: $GITHUB_REF"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -45,6 +39,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.DEPLOY_TOKEN }}
           publish_dir: ./dist
           cname: ankush-kaura.github.io
