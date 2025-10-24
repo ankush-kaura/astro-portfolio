@@ -68,24 +68,32 @@ const cvEntry = cvEntries.items[0]
     </div>
   </div>
 
-  <script>
+  <script is:inline>
     document.getElementById('download-cv-btn')?.addEventListener('click', function() {
-      const url = this.getAttribute('data-url');
-      const filename = this.getAttribute('data-filename') || 'CV.pdf';
-      if (!url) return;
-      fetch(url)
-        .then(response => response.blob())
-        .then(blob => {
-          const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(blobUrl);
-        })
-        .catch(error => console.error('Download failed:', error));
-    });
-  </script>
+       const url = this.getAttribute('data-url');
+       const filename = this.getAttribute('data-filename') || 'CV.pdf';
+       if (!url) return;
+
+       // Track resume download
+       if (window.gtag) {
+         window.gtag('event', 'resume_download', {
+           resume_filename: filename,
+         });
+       }
+
+       fetch(url)
+         .then(response => response.blob())
+         .then(blob => {
+           const blobUrl = window.URL.createObjectURL(blob);
+           const a = document.createElement('a');
+           a.href = blobUrl;
+           a.download = filename;
+           document.body.appendChild(a);
+           a.click();
+           document.body.removeChild(a);
+           window.URL.revokeObjectURL(blobUrl);
+         })
+         .catch(error => console.error('Download failed:', error));
+     });
+   </script>
 </Card>

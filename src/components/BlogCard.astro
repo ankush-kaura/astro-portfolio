@@ -13,7 +13,7 @@ const {
 } = Astro.props
 ---
 
-<Tag href={href} class={`${className}`}>
+<Tag href={href} class={`${className}`} data-blog-title={title} data-blog-href={href}>
   <ShadcnCard
     className={`transfor-y-[-40%] align-start perspective-1200 group relative flex-none transform justify-start overflow-hidden shadow-lg transition duration-75 ease-in-out bg-white/10 backdrop-blur-lg border border-white/20 ${href ? 'cursor-pointer hover:border-primary hover:bg-white/20' : ''}`}
   >
@@ -33,3 +33,20 @@ const {
     <slot />
   </ShadcnCard>
 </Tag>
+
+<script is:inline>
+  // Track blog card clicks
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest ? e.target.closest('[data-blog-title]') : null;
+    if (target) {
+      const title = target.getAttribute('data-blog-title');
+      const href = target.getAttribute('data-blog-href');
+      if (window.gtag) {
+        window.gtag('event', 'blog_click', {
+          blog_title: title,
+          blog_href: href,
+        });
+      }
+    }
+  });
+</script>
