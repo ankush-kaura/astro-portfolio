@@ -39,6 +39,13 @@ if (!blog) {
 const contentHtml = documentToHtmlString(blog.fields.content)
 ---
 
+<script define:vars={{ slug: blog.fields.slug, title: blog.fields.title }}>
+  import { trackBlogView } from '../../lib/analytics';
+
+  // Track blog view on page load
+  trackBlogView(slug, title);
+</script>
+
 <BaseLayout
   title={blog.fields.title || 'Blog Post'}
   description={blog.fields.description || 'Read our latest blog post'}

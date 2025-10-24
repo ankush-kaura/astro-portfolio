@@ -43,3 +43,23 @@ const { title, description, ogImage } = Astro.props
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={ogImage} />
+
+<!-- Google Analytics -->
+<script async src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.GA_MEASUREMENT_ID}`}></script>
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', import.meta.env.GA_MEASUREMENT_ID, {
+    page_title: '{title}',
+    page_location: '{canonicalURL}',
+    send_page_view: true,
+    enhanced_measurement: {
+      scrolls: true,
+      outbound_clicks: true,
+      site_search: true,
+      video_engagement: true,
+      file_downloads: true
+    }
+  });
+</script>

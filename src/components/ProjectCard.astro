@@ -12,7 +12,7 @@ const {
 } = Astro.props
 ---
 
-<Tag href={href} class={`${className}`} `>
+<Tag href={href} class={`${className}`} data-project-title={heading} data-project-href={href}>
   <ShadcnCard
     className={`transfor-y-[-40%] align-start perspective-1200 group relative flex-none transform justify-start overflow-hidden shadow-lg transition duration-75 ease-in-out bg-white/10 backdrop-blur-lg border border-white/20 ${href ? 'cursor-pointer hover:border-primary hover:bg-white/20' : ''}`}
   >
@@ -31,3 +31,20 @@ const {
     <slot />
   </ShadcnCard>
 </Tag>
+
+<script is:inline>
+  // Track project card clicks
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest ? e.target.closest('[data-project-title]') : null;
+    if (target) {
+      const title = target.getAttribute('data-project-title');
+      const href = target.getAttribute('data-project-href');
+      if (window.gtag) {
+        window.gtag('event', 'project_click', {
+          project_title: title,
+          project_href: href,
+        });
+      }
+    }
+  });
+</script>

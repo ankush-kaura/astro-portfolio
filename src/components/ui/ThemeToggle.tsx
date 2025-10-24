@@ -9,6 +9,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Analytics tracking
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+  }
+}
+
+function trackThemeToggle(theme: string) {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'theme_toggle', { theme });
+  }
+}
+
 export function ModeToggle() {
   const [theme, setThemeState] = React.useState<'light' | 'dark' | 'system'>(
     'system',
@@ -30,6 +43,7 @@ export function ModeToggle() {
   const onChangeTheme = (theme: any) => {
     setThemeState(theme)
     localStorage.setItem('theme', theme)
+    trackThemeToggle(theme)
   }
 
   return (
