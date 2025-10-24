@@ -41,4 +41,4 @@ jobs:
         with:
           github_token: ${{ secrets.WEBHOOK_PAT }}
           publish_dir: ./dist
-          cname: ankush-kaura.github.io
+          cname: www.ankushkaura.in
