@@ -82,6 +82,9 @@ export interface ContactContent {
 import { CONTENTFUL_CONTENT_TYPES } from './contentful-config'
 
 export interface BlogContent {
+  sys: {
+    id: string;
+  };
   contentTypeId: typeof CONTENTFUL_CONTENT_TYPES.BLOG;
   fields: {
     title: EntryFieldTypes.Text;
