@@ -39,11 +39,14 @@ if (!blog) {
 const contentHtml = documentToHtmlString(blog.fields.content)
 ---
 
-<script define:vars={{ slug: blog.fields.slug, title: blog.fields.title }}>
-  import { trackBlogView } from '../../lib/analytics';
-
+<script define:vars={{ slug: blog.fields.slug, title: blog.fields.title, gaId: import.meta.env.GA_MEASUREMENT_ID }}>
   // Track blog view on page load
-  trackBlogView(slug, title);
+  if (window.gtag) {
+    window.gtag('event', 'blog_view', {
+      blog_slug: slug,
+      blog_title: title,
+    });
+  }
 </script>
 
 <BaseLayout

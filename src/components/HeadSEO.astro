@@ -46,11 +46,11 @@ const { title, description, ogImage } = Astro.props
 
 <!-- Google Analytics -->
 <script async src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.GA_MEASUREMENT_ID}`}></script>
-<script is:inline>
+<script is:inline define:vars={{ gaId: import.meta.env.GA_MEASUREMENT_ID }}>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', import.meta.env.GA_MEASUREMENT_ID, {
+  gtag('config', gaId, {
     page_title: '{title}',
     page_location: '{canonicalURL}',
     send_page_view: true,
